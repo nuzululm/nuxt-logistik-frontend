@@ -1,0 +1,132 @@
+<template>
+    <div>
+        <div class="form-group">
+            <label for="">Identity ID</label>
+            <input type="text" class="form-control" :class="{'is-invalid': errors.identity_id}" v-model="users.identity_id">
+          	
+          	<!-- UNTUK MENAMPILKAN VALIDASI ERROR -->
+            <p class="text-danger" v-if="errors.identity_id">{{ errors.identity_id[0] }}</p>
+        </div>
+        <div class="form-group">
+            <label for="">Name</label>
+            <input type="text" class="form-control" :class="{'is-invalid': errors.name}" v-model="users.name">
+            <p class="text-danger" v-if="errors.name">{{ errors.name[0] }}</p>
+        </div>
+        <div class="form-group">
+            <label for="">Gender</label>
+            <select class="form-control" :class="{'is-invalid': errors.gender}" v-model="users.gender">
+                <option value="">Pilih</option>
+                <option value="1">Male</option>
+                <option value="0">Female</option>
+            </select>
+            <p class="text-danger" v-if="errors.gender">{{ errors.gender[0] }}</p>
+        </div>
+        <div class="form-group">
+            <label for="">Address</label>
+            <input type="text" class="form-control" :class="{'is-invalid': errors.address}" v-model="users.address">
+            <p class="text-danger" v-if="errors.address">{{ errors.address[0] }}</p>
+        </div>
+        <div class="form-group">
+            <label for="">Email</label>
+            <input type="text" class="form-control" :class="{'is-invalid': errors.email}" v-model="users.email">
+            <p class="text-danger" v-if="errors.email">{{ errors.email[0] }}</p>
+        </div>
+        <div class="form-group">
+            <label for="">Password</label>
+            <input type="password" class="form-control" :class="{'is-invalid': errors.password}" v-model="users.password">
+            <p v-if="$route.name == 'users-edit-id'">Leave blank if you don't change your password</p>
+            <p class="text-danger" v-if="errors.password">{{ errors.password[0] }}</p>
+        </div>
+        <div class="form-group">
+            <label for="">Phone Number</label>
+            <input type="text" class="form-control" :class="{'is-invalid': errors.phone_number}" v-model="users.phone_number">
+            <p class="text-danger" v-if="errors.phone_number">{{ errors.phone_number[0] }}</p>
+        </div>
+        <div class="form-group">
+            <label for="">Role</label>
+            <select class="form-control" :class="{'is-invalid': errors.role}" v-model="users.role">
+                <option value="">Pilih</option>
+                <option value="0">Admin</option>
+                <option value="1">Driver</option>
+                <option value="2">Users</option>
+            </select>
+            <p class="text-danger" v-if="errors.role">{{ errors.role[0] }}</p>
+        </div>
+        <div class="form-group">
+            <label for="">Status</label>
+            <select class="form-control" :class="{'is-invalid': errors.status}" v-model="users.status">
+                <option value="">Pilih</option>
+                <option value="0">Tidak Aktif</option>
+                <option value="1">Aktif</option>
+            </select>
+            <p class="text-danger" v-if="errors.status">{{ errors.status[0] }}</p>
+        </div>
+        <button class="btn btn-primary btn-sm" @click="submit">Save</button>
+        <nuxt-link :to="{name: 'users'}" class="btn btn-secondary btn-sm">Back</nuxt-link>
+    </div>
+</template>
+<script>
+import {mapActions, mapState} from 'vuex' 
+export default {
+    created(){
+        //FUNGSI INI HANYA AKAN KERJAKAN, APABILA HALAMAN YANG DILOAD ADALAH EDIT USER
+        if(this.$route.name == 'users-edit-id'){
+            this.users = {
+                name: this.user.name,
+                identity_id: this.user.identity_id,
+                gender: this.user.gender,
+                address: this.user.address,
+                email: this.user.email,
+                password: '',
+                phone_number: this.user.phone_number,
+                role: this.user.role,
+                status: this.user.status
+            }
+        }
+    },
+    data() {
+        return {
+            //VARIABLE UNTUK MENAMPUNG DATA INPUTAN DARI FORM
+            users: {
+                name: '',
+                identity_id: '',
+                gender: '',
+                address: '',
+                email: '',
+                password: '',
+                phone_number: '',
+                role: '',
+                status: ''
+            }
+        }
+    },
+    computed: {
+        //PANGGIL STATE ERRORS DARI MODULE USERS
+        //DIMANA STATE INI AKAN BERISI INFORMASI ERROR VALIDASI
+        ...mapState('user', {
+            user: state => state.data,
+            errors: state => state.errors
+        })
+    },
+    methods: {
+        ...mapActions('user', ['storeUsersData', 'getData','updateUserData']), //LOAD FUNGSI DARI MODULE USER
+        //KETIKA TOMBOL SAVE DITEKAN, MAKA FUNGSI INI AKAN DIJALANKAN
+        submit() {
+            //DIMANA KITA MEMANGGIL FUNGSI UNTUK MENYIMPAN DATA YANG AKAN DIDEFINISIKAN DI ACTIONS DARI MODULE USER
+
+            //JIKA PAGE YANG DILOAD ADALAH EDIT USER
+            if(this.$route.name == 'users-edit-id'){
+                //MAKA ASSIGN ID KE DALAM DATA USER
+                let data = Object.assign({id: this.$route.params.id}, this.users)
+                //KEMUDIAN KIRIM REQUEST KE SERVER
+                this.updateUserData(data).then(() => this.$router.push({name: 'users'}))
+            }else{
+                //SELAIN ITU MAKA FUNGSI ADD DATA YANG AKAN DIJALAKAN
+                //DAN KETIKA BERHASIL, MAKA AKAN DIREDIRECT KE HALAMAN LIST USER
+                this.storeUsersData(this.users).then(() => this.$router.push({name: 'users'}))
+            }
+            
+        }
+    }
+}
+</script>
